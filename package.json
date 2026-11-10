@@ -1,0 +1,13 @@
+{
+  "name": "kienparapp",
+  "version": "1.0.0",
+  "description": "PartyMatch (KienParapp) - mobile web app for party mutual-match activities",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}
