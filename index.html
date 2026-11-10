@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>PartyMatch — who wants what?</title>
+<meta name="theme-color" content="#ff4f8b" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>" />
+</head>
+<body>
+
+<div id="toast" class="toast hidden"></div>
+
+<!-- ============ HOME ============ -->
+<section id="view-home" class="view">
+  <div class="hero">
+    <div class="hero-emoji">🎉🤗</div>
+    <h1>PartyMatch</h1>
+    <p class="tagline">Everyone quietly picks who they'd chat with, hug,
+      hold hands with, dance with, or more. Nothing is ever revealed&nbsp;— unless it's mutual.</p>
+    <button class="btn btn-primary btn-lg" id="btn-go-create">Host a party</button>
+    <button class="btn btn-secondary btn-lg" id="btn-go-join">I have a party code</button>
+  </div>
+</section>
+
+<!-- ============ CREATE PARTY ============ -->
+<section id="view-create" class="view hidden">
+  <button class="back-btn" data-back="view-home">← Back</button>
+  <h2>Host a new party</h2>
+  <form id="form-create">
+    <label>Party name
+      <input type="text" id="create-name" placeholder="e.g. Sara's Birthday" required maxlength="40" />
+    </label>
+
+    <p class="small-label">Optional details</p>
+    <label>Starts at
+      <input type="datetime-local" id="create-start" />
+    </label>
+    <label>Ends at
+      <input type="datetime-local" id="create-end" />
+    </label>
+    <label>Location
+      <input type="text" id="create-location" placeholder="e.g. 123 Main St, or 'DM for address'" maxlength="120" />
+    </label>
+    <label>Cover / entry info
+      <input type="text" id="create-cover" placeholder="e.g. $10 at the door, or leave blank" maxlength="120" />
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" id="create-bring-friends" />
+      <span>Guests can bring friends</span>
+    </label>
+
+    <label class="checkbox-row confirm-row">
+      <input type="checkbox" id="create-consent-ack" required />
+      <span>I confirm this party is for consenting participants who can freely set their own boundaries, and I'll make sure the activity list reflects that.</span>
+    </label>
+
+    <p class="hint">You'll be able to customize the list of activities (add, edit, remove — even mid-party) right after creating it. Free parties support up to <strong>8 guests</strong>.</p>
+
+    <button type="submit" class="btn btn-primary btn-lg">Create party</button>
+  </form>
+</section>
+
+<!-- ============ HOST DASHBOARD ============ -->
+<section id="view-host" class="view hidden">
+  <button class="back-btn" data-back="view-home">← Home</button>
+  <h2 id="host-party-name">Party</h2>
+
+  <div class="card code-card">
+    <p class="small-label">Share this code or link with guests</p>
+    <div class="party-code" id="host-code">------</div>
+    <div id="host-qr" class="qr-wrap"></div>
+    <button class="btn btn-secondary" id="btn-copy-link">Copy invite link</button>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-box"><span id="stat-guests">0</span><label>Guests</label></div>
+    <div class="stat-box"><span id="stat-matches">0</span><label>Mutual picks</label></div>
+  </div>
+
+  <div id="promo-banner" class="promo-banner hidden"></div>
+
+  <div class="card" id="upgrade-card">
+    <p><strong>Free plan:</strong> up to 8 guests.</p>
+    <p id="guest-limit-warning" class="hidden warning">You're at your guest limit — new guests can't join until you upgrade.</p>
+    <button class="btn btn-primary" id="btn-upgrade">Upgrade for unlimited guests</button>
+  </div>
+
+  <div class="card">
+    <p class="small-label">Edit party details</p>
+    <label>Party name
+      <input type="text" id="edit-name" maxlength="40" />
+    </label>
+    <label>Starts at
+      <input type="datetime-local" id="edit-start" />
+    </label>
+    <label>Ends at
+      <input type="datetime-local" id="edit-end" />
+    </label>
+    <label>Location
+      <input type="text" id="edit-location" maxlength="120" />
+    </label>
+    <label>Cover / entry info
+      <input type="text" id="edit-cover" maxlength="120" />
+    </label>
+    <label class="checkbox-row">
+      <input type="checkbox" id="edit-bring-friends" />
+      <span>Guests can bring friends</span>
+    </label>
+    <button type="button" class="btn btn-secondary" id="btn-save-details">Save details</button>
+  </div>
+
+  <div class="card">
+    <p class="small-label">Activities</p>
+    <p class="hint small">Add, rename, or remove activities anytime — changes show up for guests immediately.</p>
+    <ul id="activity-list" class="plain-list"></ul>
+    <div class="activity-form">
+      <input type="text" id="new-activity-name" placeholder="Activity name (e.g. Chat)" maxlength="30" />
+      <input type="text" id="new-activity-desc" placeholder="Optional description" maxlength="80" />
+      <button type="button" class="btn btn-secondary" id="btn-add-activity">Add activity</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="small-label">Guest list</p>
+    <ul id="host-guest-list" class="plain-list"></ul>
+  </div>
+
+  <p class="privacy-note">🔒 As the host, you can't see who picked what for whom — only guests see their own mutual picks. That's by design. A full timestamped history of picks is kept for accountability — view it anytime via your Firebase console (see README).</p>
+</section>
+
+<!-- ============ JOIN ============ -->
+<section id="view-join" class="view hidden">
+  <button class="back-btn" data-back="view-home">← Back</button>
+  <h2>Join a party</h2>
+  <form id="form-join">
+    <label>Party code
+      <input type="text" id="join-code" placeholder="e.g. ABCD12" maxlength="8" autocapitalize="characters" required />
+    </label>
+    <button type="submit" class="btn btn-primary btn-lg">Find party</button>
+  </form>
+  <p id="join-error" class="error hidden"></p>
+</section>
+
+<!-- ============ GUEST PROFILE SETUP ============ -->
+<section id="view-profile" class="view hidden">
+  <button class="back-btn" data-back="view-home">← Back</button>
+  <h2 id="profile-party-name">Party</h2>
+  <div class="consent-banner" data-consent-banner></div>
+  <p class="hint">Add your photo and name so others can find you.</p>
+
+  <div class="photo-picker">
+    <img id="profile-photo-preview" alt="Your photo" />
+    <label class="btn btn-secondary" for="profile-photo-input">Choose photo</label>
+    <input type="file" id="profile-photo-input" accept="image/*" capture="user" class="hidden" />
+  </div>
+
+  <label>Your name
+    <input type="text" id="profile-name" placeholder="First name" maxlength="30" required />
+  </label>
+
+  <button class="btn btn-primary btn-lg" id="btn-join-party">Join party</button>
+  <p id="profile-error" class="error hidden"></p>
+</section>
+
+<!-- ============ PARTY / GUEST GRID ============ -->
+<section id="view-party" class="view hidden">
+  <div class="consent-banner" data-consent-banner></div>
+
+  <div class="party-header">
+    <div>
+      <h2 id="party-name-title">Party</h2>
+      <p class="small-label" id="party-me-label"></p>
+      <p class="hint small" id="party-details-line"></p>
+    </div>
+    <button class="icon-btn" id="btn-leave-party" title="Leave party">🚪</button>
+  </div>
+
+  <p class="hint small">Tap someone, then pick what you'd be open to. Nothing is shared unless you <em>both</em> pick the same thing. Picking nothing is always OK.</p>
+
+  <div id="guest-grid" class="guest-grid"></div>
+</section>
+
+<!-- ============ SELECTION MODAL ============ -->
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" id="modal-close">✕</button>
+    <img id="modal-photo" alt="" />
+    <h3 id="modal-name"></h3>
+    <div class="consent-banner" data-consent-banner></div>
+    <p id="modal-mutual" class="mutual-line hidden"></p>
+    <p class="hint small">What would you be open to with them? You can change this anytime, and only mutual picks are ever shown to anyone.</p>
+    <div id="modal-options" class="option-grid"></div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
